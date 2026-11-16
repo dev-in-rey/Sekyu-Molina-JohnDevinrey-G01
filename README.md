@@ -94,7 +94,18 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 7. Run the Development Server
+### 7. (Optional) Run the Test Suite & Code Coverage
+Run all unit/integration tests across `accounts`, `dashboard`, and `sekyu`, and measure Python + Django template coverage:
+```powershell
+python manage.py test
+coverage erase
+coverage run manage.py test
+coverage report -m
+coverage html
+```
+Open `htmlcov/index.html` in your browser to inspect line-by-line coverage.
+
+### 8. Run the Development Server
 ```powershell
 python manage.py runserver
 ```
