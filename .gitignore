@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
+.env
+*.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.*
+local_settings.py
+
+# SQLite (never used in final setup, excluded if generated accidentally)
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+
+# Django media and static outputs
+media/
+staticfiles/
+*.log
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
