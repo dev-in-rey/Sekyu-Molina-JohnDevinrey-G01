@@ -5,25 +5,32 @@
 {% block content %}
 <div class="row justify-content-center py-4">
     <div class="col-12 col-md-8 col-lg-6">
-        <div class="panel">
-            <div class="panel-header">
-                <span class="text-uppercase fw-bold text-danger d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em;">
-                    Security Policy Enforcement &middot; HTTP 403
-                </span>
-                <h1 class="h4 mb-0">Unauthorized Role or Resource Access</h1>
+        <div class="sk-card-elevated">
+            <div class="sk-card-header bg-danger bg-opacity-10 border-bottom border-danger border-opacity-25">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-crimson">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <span class="text-uppercase fw-bold text-danger d-block" style="font-size: 0.72rem; letter-spacing: 0.08em;">
+                            Security Policy Enforcement &middot; HTTP 403
+                        </span>
+                        <h1 class="h4 mb-0">Unauthorized Role or Resource Access</h1>
+                    </div>
+                </div>
             </div>
-            <div class="panel-body">
-                <p class="mb-3">
-                    Your account does not have permission to view or modify the requested page.
-                    In accordance with Sekyu's Role-Based Access Control (RBAC) and Republic Act No. 10173,
-                    each user is restricted strictly to their assigned role dashboard and their own profile record.
+            <div class="sk-card-body">
+                <p class="text-secondary mb-4">
+                    Your account does not have clearance to open the requested portal or profile record.
+                    In compliance with Sekyu's Role-Based Access Control (RBAC) and Republic Act No. 10173,
+                    users are strictly restricted to their assigned role dashboard and own profile.
                 </p>
-                <div class="d-flex gap-2">
-                    <a href="{% url 'dashboard' %}" class="btn btn-portal btn-sm">
-                        Return to My Dashboard
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-sekyu btn-sm">
+                        <i class="bi bi-house-door me-1"></i>Return to My Dashboard
                     </a>
-                    <a href="{% url 'profile' %}" class="btn btn-outline-portal btn-sm">
-                        My Profile
+                    <a href="{% url 'profile' %}" class="btn btn-outline-sekyu btn-sm">
+                        <i class="bi bi-person-vcard me-1"></i>My Profile
                     </a>
                 </div>
             </div>

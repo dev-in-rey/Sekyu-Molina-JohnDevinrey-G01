@@ -4,98 +4,132 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-12 col-lg-10 col-xl-9">
+    <div class="col-12 col-xl-10">
 
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-baseline pb-3 mb-4 border-bottom">
-            <div>
-                <span class="text-uppercase fw-bold small d-block mb-1" style="letter-spacing: 0.08em; color: var(--sk-accent);">
-                    Subdivision Homeowner &amp; Resident Portal
-                </span>
-                <h1 class="h3 mb-1">
-                    Welcome, {{ user.first_name|default:user.username }}
-                </h1>
-                <p class="text-muted small mb-0">
-                    Manage your household security profile, contact credentials, and gate clearance status.
-                </p>
-            </div>
-            <div class="mt-3 mt-sm-0 d-flex gap-2">
-                <a href="{% url 'profile' %}" class="btn btn-outline-portal btn-sm">
-                    <i class="bi bi-person-badge me-1"></i>My Profile
-                </a>
-                <a href="{% url 'profile_edit' %}" class="btn btn-portal btn-sm">
-                    <i class="bi bi-pencil-square me-1"></i>Edit Profile
-                </a>
+        <!-- Homeowner Welcome Banner -->
+        <div class="sk-banner-resident mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    {% if user.profile_photo %}
+                        <img src="{{ user.profile_photo.url }}" alt="{{ user.username }}" class="avatar-circle">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ user.first_name|first|default:user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.08em; color: #a7f3d0;">
+                            <i class="bi bi-house-door-fill me-1"></i>Resident Home Portal
+                        </span>
+                        <h1 class="h3 text-white mb-1">
+                            Welcome home, {{ user.first_name|default:user.username }}
+                        </h1>
+                        <p class="sk-text-on-dark-muted small mb-0">
+                            Manage your household account, contact credentials, and HOA verification standing.
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'profile' %}" class="btn btn-light btn-sm fw-semibold">
+                        <i class="bi bi-person-vcard me-1"></i>Security ID
+                    </a>
+                    <a href="{% url 'profile_edit' %}" class="btn btn-sekyu-emerald btn-sm">
+                        <i class="bi bi-pencil-square me-1"></i>Edit Profile
+                    </a>
+                </div>
             </div>
         </div>
 
+        <!-- HOA Verification Status Alert -->
         {% if not user.is_approved %}
             <div class="alert alert-warning alert-portal alert-portal-warning mb-4" role="alert">
-                <div class="d-flex align-items-start gap-2">
-                    <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                <div class="d-flex align-items-start gap-3">
+                    <i class="bi bi-hourglass-split fs-5 mt-1"></i>
                     <div>
-                        <strong>Household Verification Pending (BR-13):</strong>
-                        Your resident account is awaiting verification by the Homeowners Association (HOA) Administrator.
-                        Please ensure your full name, email address, and contact number in <a href="{% url 'profile_edit' %}" class="fw-semibold text-dark">My Profile</a> are accurate.
+                        <div class="fw-bold">Household Verification Pending (BR-13)</div>
+                        <div class="small">
+                            Your resident account is awaiting review by the Homeowners Association (HOA) Administrator.
+                            Ensure your name, email, and mobile dispatch number are complete in
+                            <a href="{% url 'profile_edit' %}" class="fw-semibold text-dark text-decoration-underline">Edit Profile</a>.
+                        </div>
                     </div>
                 </div>
             </div>
         {% else %}
             <div class="alert alert-success alert-portal alert-portal-success mb-4" role="alert">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-check"></i>
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-patch-check-fill fs-5"></i>
                     <div>
-                        <strong>Verified Resident Account:</strong> Your household profile is approved and in good standing with the HOA.
+                        <div class="fw-bold">Verified Homeowner Standing</div>
+                        <div class="small">
+                            Your household account is approved and recognized in the verified community directory.
+                        </div>
                     </div>
                 </div>
             </div>
         {% endif %}
 
+        <!-- KPI Summary Row -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="panel p-3 h-100">
-                    <span class="meta-label d-block mb-1">Account Standing</span>
-                    <div class="h5 mb-1">
-                        {% if user.is_approved %}
-                            <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>HOA Verified</span>
-                        {% else %}
-                            <span class="text-warning"><i class="bi bi-clock-history me-1"></i>Pending Review</span>
-                        {% endif %}
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon {% if user.is_approved %}sk-stat-icon-emerald{% else %}sk-stat-icon-amber{% endif %}">
+                        <i class="bi {% if user.is_approved %}bi-shield-check{% else %}bi-clock-history{% endif %}"></i>
                     </div>
-                    <span class="text-muted small">Subdivision Resident Access</span>
+                    <div>
+                        <span class="meta-label d-block">Account Standing</span>
+                        <div class="h5 mb-0 {% if user.is_approved %}text-success{% else %}sk-text-amber{% endif %}">
+                            {% if user.is_approved %}HOA Verified{% else %}Pending Review{% endif %}
+                        </div>
+                        <span class="text-muted small">Resident portal status</span>
+                    </div>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="panel p-3 h-100">
-                    <span class="meta-label d-block mb-1">Registered Residents</span>
-                    <div class="h5 mb-1">{{ resident_count }} Homeowner{{ resident_count|pluralize }}</div>
-                    <span class="text-muted small">Active community directory</span>
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-navy">
+                        <i class="bi bi-houses-fill"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Active Residents</span>
+                        <div class="h5 mb-0 tabular-nums">{{ resident_count }} Homeowner{{ resident_count|pluralize }}</div>
+                        <span class="text-muted small">Registered community members</span>
+                    </div>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="panel p-3 h-100">
-                    <span class="meta-label d-block mb-1">Gatehouse Security</span>
-                    <div class="h5 mb-1">{{ guard_count }} On-Duty Guard{{ guard_count|pluralize }}</div>
-                    <span class="text-muted small">24/7 digital checkpoint personnel</span>
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-amber">
+                        <i class="bi bi-person-badge-fill"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Gatehouse Guards</span>
+                        <div class="h5 mb-0 tabular-nums">{{ guard_count }} Active Guard{{ guard_count|pluralize }}</div>
+                        <span class="text-muted small">Subdivision checkpoint staff</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="panel mb-4">
-            <div class="panel-header d-flex justify-content-between align-items-center">
+        <!-- Resident Identity & Security Record -->
+        <div class="sk-card">
+            <div class="sk-card-header d-flex justify-content-between align-items-center">
                 <div>
                     <h2 class="h5 mb-0">Resident Identity &amp; Security Record</h2>
-                    <span class="text-muted small">Registered homeowner credentials under RA 10173 protection</span>
+                    <span class="text-muted small">Personal credentials safeguarded under Republic Act No. 10173</span>
                 </div>
                 <span class="role-tag role-tag-{{ user.role }}">
-                    {{ user.get_role_display }}
+                    <i class="bi bi-house-check"></i>{{ user.get_role_display }}
                 </span>
             </div>
 
-            <div class="panel-body">
+            <div class="sk-card-body">
                 <dl class="row mb-0">
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Full Name</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-person me-2"></i>Full Name</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {% if user.first_name or user.last_name %}
                                     {{ user.first_name }} {{ user.last_name }}
@@ -108,8 +142,8 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Username</dt>
-                            <dd class="col-sm-8 meta-value mb-0 font-monospace">
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-at me-2"></i>Username</dt>
+                            <dd class="col-sm-8 meta-value mb-0 font-mono-code">
                                 {{ user.username }}
                             </dd>
                         </div>
@@ -117,7 +151,7 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Email Address</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-envelope me-2"></i>Email Address</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {{ user.email|default:"Not specified" }}
                             </dd>
@@ -126,7 +160,7 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Contact Number</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-telephone me-2"></i>Dispatch Phone</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {{ user.phone_number|default:"Not specified" }}
                             </dd>
@@ -135,7 +169,7 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">HOA Approval Status</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-patch-check me-2"></i>HOA Approval</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {% if user.is_approved %}
                                     <span class="status-badge-approved">Verified &amp; Approved</span>
@@ -148,18 +182,20 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Last System Login</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-clock me-2"></i>Last System Login</dt>
                             <dd class="col-sm-8 meta-value mb-0">
-                                {{ user.last_login|date:"F d, Y &middot; g:i A"|default:"First login" }}
+                                {{ user.last_login|date:"F d, Y · g:i A"|default:"First login" }}
                             </dd>
                         </div>
                     </div>
                 </dl>
             </div>
 
-            <div class="panel-footer d-flex justify-content-between align-items-center text-muted small">
-                <span>Account ID: #{{ user.id }}</span>
-                <span>Role: {{ user.get_role_display }}</span>
+            <div class="sk-card-footer d-flex justify-content-between align-items-center text-muted small">
+                <span class="font-mono-code">Account ID: #{{ user.id }}</span>
+                <a href="{% url 'profile_edit' %}" class="fw-semibold text-decoration-underline" style="color: var(--sk-emerald);">
+                    Keep contact info updated &rarr;
+                </a>
             </div>
         </div>
 

@@ -4,44 +4,50 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-12 col-md-9 col-lg-7">
+    <div class="col-12 col-md-10 col-lg-8">
 
         <div class="mb-3">
-            <a href="{% url 'profile' %}" class="text-decoration-none text-muted small">
-                &larr; Back to My Profile
+            <a href="{% url 'profile' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to My Profile
             </a>
         </div>
 
-        <div class="panel">
-            <div class="panel-header d-flex justify-content-between align-items-center">
+        <div class="sk-card-elevated">
+            <div class="sk-card-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h4 mb-1">Edit Profile Details</h1>
-                    <p class="text-muted small mb-0">Update your personal contact details and profile photograph below.</p>
+                    <span class="text-uppercase fw-bold small d-block mb-1" style="letter-spacing: 0.08em; color: var(--sk-emerald);">
+                        Account Security Settings
+                    </span>
+                    <h1 class="h4 mb-0">Edit Profile Details</h1>
                 </div>
                 <span class="role-tag role-tag-{{ user.role }}">
                     {{ user.get_role_display }}
                 </span>
             </div>
 
-            <div class="panel-body">
-                <div class="p-3 mb-4 border rounded-1 bg-light text-muted small">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-sm-6">
-                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Username</span>
-                            <span class="text-dark font-monospace">{{ user.username }}</span>
+            <div class="sk-card-body">
+                <!-- Live Avatar & Read-only Account Summary -->
+                <div class="p-3 mb-4 rounded-3 border bg-light d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if user.profile_photo %}
+                            <img id="photoPreviewImg" src="{{ user.profile_photo.url }}" alt="Profile Photo Preview" class="avatar-circle">
+                        {% else %}
+                            <div id="photoPreviewPlaceholder" class="avatar-placeholder">
+                                {{ user.first_name|first|default:user.username|first|upper }}
+                            </div>
+                            <img id="photoPreviewImg" src="" alt="Profile Photo Preview" class="avatar-circle d-none">
+                        {% endif %}
+                        <div>
+                            <div class="fw-bold text-dark">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="text-muted small font-mono-code">@{{ user.username }} &middot; Account #{{ user.id }}</div>
                         </div>
-                        <div class="col-sm-6">
-                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Assigned Role</span>
-                            <span class="text-dark">{{ user.get_role_display }}</span>
-                        </div>
-                        <div class="col-sm-6">
-                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Current Full Name</span>
-                            <span class="text-dark">{{ user.get_full_name|default:"Not specified" }}</span>
-                        </div>
-                        <div class="col-sm-6">
-                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Contact Number</span>
-                            <span class="text-dark">{{ user.phone_number|default:"Not specified" }}</span>
-                        </div>
+                    </div>
+                    <div class="text-sm-end">
+                        {% if user.is_approved %}
+                            <span class="status-badge-approved"><i class="bi bi-patch-check-fill"></i>HOA Verified</span>
+                        {% else %}
+                            <span class="status-badge-pending"><i class="bi bi-hourglass-split"></i>Pending HOA Review</span>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -82,46 +88,40 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">
-                            Email Address <span class="text-danger">*</span>
-                        </label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="invalid-feedback d-block text-danger small mt-1">
-                                {% for error in form.email.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="{{ form.phone_number.id_for_label }}" class="form-label">
-                            Contact Number
-                        </label>
-                        {{ form.phone_number }}
-                        <div class="form-text text-muted small">
-                            e.g. +63 917 123 4567 (used for gate pass notifications and security verification)
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                Email Address <span class="text-danger">*</span>
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block text-danger small mt-1">
+                                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
-                        {% if form.phone_number.errors %}
-                            <div class="invalid-feedback d-block text-danger small mt-1">
-                                {% for error in form.phone_number.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
+
+                        <div class="col-sm-6">
+                            <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                                Contact Number
+                            </label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}
+                                <div class="invalid-feedback d-block text-danger small mt-1">
+                                    {% for error in form.phone_number.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <div class="mb-4">
                         <label for="{{ form.profile_photo.id_for_label }}" class="form-label">
                             Profile Photograph
                         </label>
-                        {% if user.profile_photo %}
-                            <div class="d-flex align-items-center gap-3 mb-2">
-                                <img src="{{ user.profile_photo.url }}" alt="Current Profile Photo" class="avatar-circle">
-                                <span class="text-muted small">Current profile photo uploaded</span>
-                            </div>
-                        {% endif %}
                         {{ form.profile_photo }}
+                        <div id="photoPreviewCaption" class="small sk-text-emerald fw-semibold mt-1 d-none" aria-live="polite"></div>
                         <div class="form-text text-muted small">
-                            Upload a clear headshot (JPG, PNG, or WEBP) for subdivision resident identification.
+                            Select a clear headshot (JPG, PNG, or WEBP) for subdivision identification. Preview updates automatically above.
                         </div>
                         {% if form.profile_photo.errors %}
                             <div class="invalid-feedback d-block text-danger small mt-1">
@@ -130,11 +130,11 @@
                         {% endif %}
                     </div>
 
-                    <div class="pt-3 border-top d-flex align-items-center gap-3">
-                        <button type="submit" class="btn btn-portal">
-                            Save Changes
+                    <div class="pt-3 border-top d-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-sekyu-emerald">
+                            <i class="bi bi-check2 me-1"></i>Save Changes
                         </button>
-                        <a href="{% url 'profile' %}" class="btn btn-outline-portal">
+                        <a href="{% url 'profile' %}" class="btn btn-outline-sekyu">
                             Cancel
                         </a>
                     </div>
@@ -144,4 +144,32 @@
 
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var fileInput = document.getElementById("{{ form.profile_photo.id_for_label }}");
+    var previewImg = document.getElementById("photoPreviewImg");
+    var placeholder = document.getElementById("photoPreviewPlaceholder");
+    var caption = document.getElementById("photoPreviewCaption");
+    if (!fileInput || !previewImg) return;
+
+    fileInput.addEventListener("change", function (event) {
+        var file = event.target.files && event.target.files[0];
+        if (!file || !file.type.startsWith("image/")) return;
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            previewImg.src = e.target.result;
+            previewImg.classList.remove("d-none");
+            if (placeholder) placeholder.classList.add("d-none");
+            if (caption) {
+                caption.textContent = "Preview ready: " + file.name + " (click Save Changes to upload)";
+                caption.classList.remove("d-none");
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+})();
+</script>
 {% endblock %}

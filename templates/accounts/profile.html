@@ -6,60 +6,67 @@
 <div class="row justify-content-center">
     <div class="col-12 col-lg-9 col-xl-8">
 
-        <div class="mb-3">
-            <a href="{% url 'dashboard' %}" class="text-decoration-none text-muted small">
-                &larr; Back to Dashboard
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{% url 'dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+            <a href="{% url 'profile_edit' %}" class="btn btn-sekyu-emerald btn-sm">
+                <i class="bi bi-pencil-square me-1"></i>Edit Profile
             </a>
         </div>
 
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-baseline pb-3 mb-4 border-bottom">
-            <div>
-                <h1 class="h3 mb-1">My Profile</h1>
-                <p class="text-muted small mb-0">
-                    Personal &amp; community security identity registered on Sekyu
-                </p>
-            </div>
-            <div class="mt-3 mt-sm-0 d-flex gap-2">
-                <a href="{% url 'profile_edit' %}" class="btn btn-portal btn-sm">
-                    <i class="bi bi-pencil-square me-1"></i>Edit Profile
-                </a>
-            </div>
-        </div>
-
-        <div class="panel mb-4">
-            <div class="panel-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-3">
-                    {% if user.profile_photo %}
-                        <img src="{{ user.profile_photo.url }}" alt="{{ user.username }} Profile Photo" class="avatar-circle">
-                    {% else %}
-                        <div class="avatar-placeholder">
-                            {{ user.first_name|first|default:user.username|first|upper }}
-                        </div>
-                    {% endif %}
-                    <div>
-                        <h2 class="h5 mb-0">{{ user.get_full_name|default:user.username }}</h2>
-                        <span class="text-muted small">@{{ user.username }} &middot; Verified Sekyu Account</span>
-                    </div>
-                </div>
-                <div class="text-end">
-                    <span class="role-tag role-tag-{{ user.role }} d-inline-block mb-1">
-                        {{ user.get_role_display }}
-                    </span>
-                    <div>
-                        {% if user.is_approved %}
-                            <span class="status-badge-approved"><i class="bi bi-patch-check-fill me-1"></i>HOA Verified</span>
+        <!-- Digital Community Security ID Card -->
+        <div class="sk-card-elevated mb-4">
+            <div class="sk-id-header">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if user.profile_photo %}
+                            <img src="{{ user.profile_photo.url }}" alt="{{ user.username }} Profile Photo" class="avatar-circle">
                         {% else %}
-                            <span class="status-badge-pending"><i class="bi bi-hourglass-split me-1"></i>Pending HOA Approval</span>
+                            <div class="avatar-placeholder">
+                                {{ user.first_name|first|default:user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.68rem; letter-spacing: 0.1em; color: #a7f3d0;">
+                                Sekyu &middot; Digital Security Identity
+                            </span>
+                            <h1 class="h4 text-white mb-1">{{ user.get_full_name|default:user.username }}</h1>
+                            <span class="small sk-text-on-dark-muted font-mono-code">@{{ user.username }} &middot; ID #{{ user.id }}</span>
+                        </div>
+                    </div>
+
+                    <div class="text-sm-end d-flex flex-sm-column align-items-start align-items-sm-end gap-2">
+                        <span class="role-tag role-tag-{{ user.role }}">
+                            <i class="bi bi-person-badge"></i>{{ user.get_role_display }}
+                        </span>
+                        {% if user.is_approved %}
+                            <span class="status-badge-approved">
+                                <i class="bi bi-patch-check-fill"></i>HOA Verified
+                            </span>
+                        {% else %}
+                            <span class="status-badge-pending">
+                                <i class="bi bi-hourglass-split"></i>Pending HOA Approval
+                            </span>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="panel-body">
+            <div class="sk-card-body">
+                <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                    <h2 class="h6 mb-0 text-uppercase text-muted" style="letter-spacing: 0.06em;">
+                        Personal &amp; Contact Information
+                    </h2>
+                    <span class="small text-muted">
+                        <i class="bi bi-lock-fill text-success me-1"></i>Private to your account
+                    </span>
+                </div>
+
                 <dl class="row mb-0">
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Full Name</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-person me-2"></i>Full Name</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {% if user.first_name or user.last_name %}
                                     {{ user.first_name }} {{ user.last_name }}
@@ -72,26 +79,8 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">First Name</dt>
-                            <dd class="col-sm-8 meta-value mb-0">
-                                {{ user.first_name|default:"Not specified" }}
-                            </dd>
-                        </div>
-                    </div>
-
-                    <div class="col-12 record-row">
-                        <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Last Name</dt>
-                            <dd class="col-sm-8 meta-value mb-0">
-                                {{ user.last_name|default:"Not specified" }}
-                            </dd>
-                        </div>
-                    </div>
-
-                    <div class="col-12 record-row">
-                        <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Username</dt>
-                            <dd class="col-sm-8 meta-value mb-0 font-monospace">
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-at me-2"></i>Username</dt>
+                            <dd class="col-sm-8 meta-value mb-0 font-mono-code">
                                 {{ user.username }}
                             </dd>
                         </div>
@@ -99,7 +88,7 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Email Address</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-envelope me-2"></i>Email Address</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {{ user.email|default:"Not specified" }}
                             </dd>
@@ -108,7 +97,7 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Contact Number</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-telephone me-2"></i>Contact Number</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {{ user.phone_number|default:"Not specified" }}
                             </dd>
@@ -117,16 +106,16 @@
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">System Role</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-shield-check me-2"></i>Assigned Role</dt>
                             <dd class="col-sm-8 meta-value mb-0">
-                                {{ user.get_role_display }} ({{ user.role }})
+                                {{ user.get_role_display }} <span class="text-muted small font-mono-code">({{ user.role }})</span>
                             </dd>
                         </div>
                     </div>
 
                     <div class="col-12 record-row">
                         <div class="row align-items-center">
-                            <dt class="col-sm-4 meta-label">Date Joined</dt>
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-calendar-check me-2"></i>Member Since</dt>
                             <dd class="col-sm-8 meta-value mb-0">
                                 {{ user.date_joined|date:"F d, Y" }}
                             </dd>
@@ -135,10 +124,10 @@
                 </dl>
             </div>
 
-            <div class="panel-footer d-flex justify-content-between align-items-center text-muted small">
-                <span>Account ID: #{{ user.id }}</span>
-                <a href="{% url 'profile_edit' %}" class="text-dark fw-semibold text-decoration-underline">
-                    Update profile details &rarr;
+            <div class="sk-card-footer d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 text-muted small">
+                <span><i class="bi bi-info-circle me-1"></i>Only you can view or edit your personal profile.</span>
+                <a href="{% url 'profile_edit' %}" class="fw-semibold text-decoration-underline" style="color: var(--sk-emerald);">
+                    Update profile details &amp; photo &rarr;
                 </a>
             </div>
         </div>

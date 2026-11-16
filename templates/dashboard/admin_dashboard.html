@@ -6,83 +6,139 @@
 <div class="row justify-content-center">
     <div class="col-12 col-xl-11">
 
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-baseline pb-3 mb-4 border-bottom">
-            <div>
-                <span class="text-uppercase fw-bold text-danger small d-block mb-1" style="letter-spacing: 0.08em;">
-                    Homeowners Association (HOA) Control Center
-                </span>
-                <h1 class="h3 mb-1">HOA Administration Console</h1>
-                <p class="text-muted small mb-0">
-                    Approve pending resident registrations, provision security guard accounts, and audit community users.
-                </p>
-            </div>
-            <div class="mt-3 mt-sm-0 d-flex align-items-center gap-2">
-                <span class="role-tag role-tag-ADMIN">HOA Administrator</span>
-                <a href="/admin/" class="btn btn-outline-portal btn-sm">Django Admin &rarr;</a>
+        <!-- HOA Admin Console Banner -->
+        <div class="sk-banner-admin mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.08em; color: #fca5a5;">
+                        <i class="bi bi-sliders me-1"></i>Homeowners Association (HOA) Control Center
+                    </span>
+                    <h1 class="h3 text-white mb-1">HOA Administration Console</h1>
+                    <p class="sk-text-on-dark-muted small mb-0">
+                        Approve pending resident sign-ups, manage active status, and assign community security roles.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="role-tag role-tag-ADMIN">HOA Administrator</span>
+                    <a href="/admin/" class="btn btn-light btn-sm fw-semibold">
+                        Django Admin <i class="bi bi-box-arrow-up-right ms-1"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
+        <!-- Admin KPI Cards -->
         <div class="row g-3 mb-4">
             <div class="col-sm-6 col-lg-3">
-                <div class="panel p-3 h-100">
-                    <span class="meta-label d-block mb-1">Total Accounts</span>
-                    <div class="h4 mb-0">{{ total_users }}</div>
-                    <span class="text-muted small">Registered across Sekyu</span>
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-navy">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Total Accounts</span>
+                        <div class="h4 mb-0 tabular-nums">{{ total_users }}</div>
+                        <span class="text-muted small">All community users</span>
+                    </div>
                 </div>
             </div>
+
             <div class="col-sm-6 col-lg-3">
-                <div class="panel p-3 h-100">
-                    <span class="meta-label d-block mb-1">Pending Residents</span>
-                    <div class="h4 mb-0 text-warning">{{ pending_count }}</div>
-                    <span class="text-muted small">Awaiting HOA verification</span>
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-amber">
+                        <i class="bi bi-person-exclamation"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Pending Review</span>
+                        <div class="h4 mb-0 sk-text-amber tabular-nums">{{ pending_count }}</div>
+                        <span class="text-muted small">Awaiting HOA approval</span>
+                    </div>
                 </div>
             </div>
+
             <div class="col-sm-6 col-lg-3">
-                <div class="panel p-3 h-100">
-                    <span class="meta-label d-block mb-1">Verified Residents</span>
-                    <div class="h4 mb-0 text-success">{{ approved_residents_count }}</div>
-                    <span class="text-muted small">Approved homeowners</span>
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-emerald">
+                        <i class="bi bi-house-check-fill"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Verified Residents</span>
+                        <div class="h4 mb-0 text-success tabular-nums">{{ approved_residents_count }}</div>
+                        <span class="text-muted small">Approved homeowners</span>
+                    </div>
                 </div>
             </div>
+
             <div class="col-sm-6 col-lg-3">
-                <div class="panel p-3 h-100">
-                    <span class="meta-label d-block mb-1">Security &amp; Admins</span>
-                    <div class="h4 mb-0">{{ guard_count }} Guard{{ guard_count|pluralize }} &middot; {{ admin_count }} Admin{{ admin_count|pluralize }}</div>
-                    <span class="text-muted small">Authorized staff roster</span>
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-crimson">
+                        <i class="bi bi-shield-shaded"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Security &amp; Admins</span>
+                        <div class="h4 mb-0 tabular-nums">{{ guard_count }}G &middot; {{ admin_count }}A</div>
+                        <span class="text-muted small">{{ guard_count }} Guard{{ guard_count|pluralize }}, {{ admin_count }} Admin{{ admin_count|pluralize }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="panel mb-4">
-            <div class="panel-header d-flex justify-content-between align-items-center">
+        <!-- Community User & Role Roster -->
+        <div class="sk-card">
+            <div class="sk-card-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                 <div>
                     <h2 class="h5 mb-0">Community User &amp; Role Roster</h2>
-                    <span class="text-muted small">Verify new resident sign-ups and manage role assignments (RESIDENT, GUARD, ADMIN)</span>
+                    <span class="text-muted small">Verify resident registrations, assign roles, or toggle account access</span>
                 </div>
-                <span class="text-muted small">Session: #{{ user.id }} ({{ user.username }})</span>
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <div class="input-group input-group-sm" style="width: 230px;">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="adminUserSearch" class="form-control border-start-0" placeholder="Filter users...">
+                    </div>
+                    <select id="adminRoleFilter" class="form-select form-select-sm" style="width: auto;">
+                        <option value="ALL">All Roles</option>
+                        <option value="RESIDENT">Residents</option>
+                        <option value="GUARD">Guards</option>
+                        <option value="ADMIN">Admins</option>
+                        <option value="PENDING">Pending Approval</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="panel-body p-0">
+            <div class="sk-card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-uppercase text-muted">
+                    <table class="table table-hover align-middle mb-0 sk-table" id="adminRosterTable">
+                        <thead>
                             <tr>
                                 <th class="ps-4">User</th>
                                 <th>Email &amp; Phone</th>
                                 <th>Role</th>
-                                <th>HOA Status</th>
+                                <th>Standing</th>
                                 <th class="pe-4 text-end">Administrative Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for member in all_users %}
-                                <tr>
+                                <tr class="admin-user-row" data-role="{{ member.role }}" data-pending="{% if member.role == 'RESIDENT' and not member.is_approved %}1{% else %}0{% endif %}">
                                     <td class="ps-4">
-                                        <div class="fw-semibold">{{ member.get_full_name|default:member.username }}</div>
-                                        <div class="text-muted small font-monospace">@{{ member.username }}</div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if member.profile_photo %}
+                                                <img src="{{ member.profile_photo.url }}" alt="{{ member.username }}" class="avatar-sm">
+                                            {% else %}
+                                                <span class="avatar-sm-placeholder">
+                                                    {{ member.first_name|first|default:member.username|first|upper }}
+                                                </span>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-semibold">{{ member.get_full_name|default:member.username }}</div>
+                                                <div class="text-muted small font-mono-code">@{{ member.username }}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
-                                        <div>{{ member.email }}</div>
+                                        <div class="small">{{ member.email }}</div>
                                         <div class="text-muted small">{{ member.phone_number|default:"No phone" }}</div>
                                     </td>
                                     <td>
@@ -94,9 +150,13 @@
                                         {% if not member.is_active %}
                                             <span class="badge bg-secondary">Deactivated</span>
                                         {% elif member.is_approved %}
-                                            <span class="status-badge-approved">Approved</span>
+                                            <span class="status-badge-approved">
+                                                <i class="bi bi-check-circle-fill"></i>Approved
+                                            </span>
                                         {% else %}
-                                            <span class="status-badge-pending">Pending Approval</span>
+                                            <span class="status-badge-pending">
+                                                <i class="bi bi-hourglass-split"></i>Pending
+                                            </span>
                                         {% endif %}
                                     </td>
                                     <td class="pe-4 text-end">
@@ -106,7 +166,7 @@
                                                     {% csrf_token %}
                                                     <input type="hidden" name="action" value="approve">
                                                     <button type="submit" class="btn btn-success btn-sm">
-                                                        Approve
+                                                        <i class="bi bi-check-lg me-1"></i>Approve
                                                     </button>
                                                 </form>
                                             {% elif member.role == "RESIDENT" and member.is_approved %}
@@ -123,15 +183,23 @@
                                                 <form method="post" action="{% url 'manage_user_status' member.pk %}" class="d-inline-flex align-items-center gap-1">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="action" value="change_role">
-                                                    <select name="role" class="form-select form-select-sm" style="width: auto; padding-top: 0.2rem; padding-bottom: 0.2rem;">
+                                                    <select name="role" class="form-select form-select-sm" style="width: auto; padding-top: 0.22rem; padding-bottom: 0.22rem;">
                                                         {% for role_val, role_label in role_choices %}
                                                             <option value="{{ role_val }}" {% if member.role == role_val %}selected{% endif %}>
                                                                 {{ role_val }}
                                                             </option>
                                                         {% endfor %}
                                                     </select>
-                                                    <button type="submit" class="btn btn-outline-portal btn-sm">
+                                                    <button type="submit" class="btn btn-outline-sekyu btn-sm">
                                                         Set Role
+                                                    </button>
+                                                </form>
+
+                                                <form method="post" action="{% url 'manage_user_status' member.pk %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="toggle_active">
+                                                    <button type="submit" class="btn {% if member.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} btn-sm">
+                                                        {% if member.is_active %}Deactivate{% else %}Activate{% endif %}
                                                     </button>
                                                 </form>
                                             {% endif %}
@@ -139,16 +207,54 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+                            <tr id="adminEmptySearch" class="d-none">
+                                <td colspan="5" class="text-center py-4 text-muted small">
+                                    <i class="bi bi-funnel me-1"></i>No user accounts match the current search or role filter.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="panel-footer text-muted small">
-                Notice: Only HOA Administrators can access this console and promote accounts to Security Guard or Administrator roles.
+            <div class="sk-card-footer text-muted small d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-shield-exclamation me-1"></i>Restricted to HOA Administrators. Self-deactivation and role demotion are prevented.</span>
+                <span class="font-mono-code">Session #{{ user.id }} ({{ user.username }})</span>
             </div>
         </div>
 
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var searchInput = document.getElementById("adminUserSearch");
+    var roleSelect = document.getElementById("adminRoleFilter");
+    var emptyRow = document.getElementById("adminEmptySearch");
+    if (!searchInput || !roleSelect) return;
+
+    function filterRows() {
+        var q = searchInput.value.trim().toLowerCase();
+        var roleFilter = roleSelect.value;
+        var visible = 0;
+        var rows = document.querySelectorAll("#adminRosterTable .admin-user-row");
+        rows.forEach(function (row) {
+            var textMatch = row.textContent.toLowerCase().includes(q);
+            var roleMatch =
+                roleFilter === "ALL" ||
+                (roleFilter === "PENDING" && row.getAttribute("data-pending") === "1") ||
+                row.getAttribute("data-role") === roleFilter;
+            var show = textMatch && roleMatch;
+            row.style.display = show ? "" : "none";
+            if (show) visible += 1;
+        });
+        if (emptyRow) emptyRow.classList.toggle("d-none", visible > 0 || rows.length === 0);
+    }
+
+    searchInput.addEventListener("input", filterRows);
+    roleSelect.addEventListener("change", filterRows);
+})();
+</script>
 {% endblock %}
