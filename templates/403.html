@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — Access Denied (403){% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="panel">
+            <div class="panel-header">
+                <span class="text-uppercase fw-bold text-danger d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em;">
+                    Security Policy Enforcement &middot; HTTP 403
+                </span>
+                <h1 class="h4 mb-0">Unauthorized Role or Resource Access</h1>
+            </div>
+            <div class="panel-body">
+                <p class="mb-3">
+                    Your account does not have permission to view or modify the requested page.
+                    In accordance with Sekyu's Role-Based Access Control (RBAC) and Republic Act No. 10173,
+                    each user is restricted strictly to their assigned role dashboard and their own profile record.
+                </p>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-portal btn-sm">
+                        Return to My Dashboard
+                    </a>
+                    <a href="{% url 'profile' %}" class="btn btn-outline-portal btn-sm">
+                        My Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
