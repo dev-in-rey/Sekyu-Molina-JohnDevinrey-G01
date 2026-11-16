@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — Edit Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-9 col-lg-7">
+
+        <div class="mb-3">
+            <a href="{% url 'profile' %}" class="text-decoration-none text-muted small">
+                &larr; Back to My Profile
+            </a>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h4 mb-1">Edit Profile Details</h1>
+                    <p class="text-muted small mb-0">Update your personal contact details and profile photograph below.</p>
+                </div>
+                <span class="role-tag role-tag-{{ user.role }}">
+                    {{ user.get_role_display }}
+                </span>
+            </div>
+
+            <div class="panel-body">
+                <div class="p-3 mb-4 border rounded-1 bg-light text-muted small">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-sm-6">
+                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Username</span>
+                            <span class="text-dark font-monospace">{{ user.username }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Assigned Role</span>
+                            <span class="text-dark">{{ user.get_role_display }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Current Full Name</span>
+                            <span class="text-dark">{{ user.get_full_name|default:"Not specified" }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-uppercase fw-semibold d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Contact Number</span>
+                            <span class="text-dark">{{ user.phone_number|default:"Not specified" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-portal alert-portal-danger mb-3" role="alert">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                First Name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="invalid-feedback d-block text-danger small mt-1">
+                                    {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                Last Name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="invalid-feedback d-block text-danger small mt-1">
+                                    {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                            Email Address <span class="text-danger">*</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback d-block text-danger small mt-1">
+                                {% for error in form.email.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                            Contact Number
+                        </label>
+                        {{ form.phone_number }}
+                        <div class="form-text text-muted small">
+                            e.g. +63 917 123 4567 (used for gate pass notifications and security verification)
+                        </div>
+                        {% if form.phone_number.errors %}
+                            <div class="invalid-feedback d-block text-danger small mt-1">
+                                {% for error in form.phone_number.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.profile_photo.id_for_label }}" class="form-label">
+                            Profile Photograph
+                        </label>
+                        {% if user.profile_photo %}
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <img src="{{ user.profile_photo.url }}" alt="Current Profile Photo" class="avatar-circle">
+                                <span class="text-muted small">Current profile photo uploaded</span>
+                            </div>
+                        {% endif %}
+                        {{ form.profile_photo }}
+                        <div class="form-text text-muted small">
+                            Upload a clear headshot (JPG, PNG, or WEBP) for subdivision resident identification.
+                        </div>
+                        {% if form.profile_photo.errors %}
+                            <div class="invalid-feedback d-block text-danger small mt-1">
+                                {% for error in form.profile_photo.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="pt-3 border-top d-flex align-items-center gap-3">
+                        <button type="submit" class="btn btn-portal">
+                            Save Changes
+                        </button>
+                        <a href="{% url 'profile' %}" class="btn btn-outline-portal">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
