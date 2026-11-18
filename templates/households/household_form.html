@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — {% if form.instance.pk %}Edit Household Unit{% else %}Register Household Unit{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-7">
+
+        <div class="mb-3">
+            <a href="{% url 'household_list' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to My Household Units
+            </a>
+        </div>
+
+        <div class="sk-card-elevated">
+            <div class="sk-card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-uppercase fw-bold small d-block mb-1" style="letter-spacing: 0.08em; color: var(--sk-emerald);">
+                        Subdivision Property Registration (F-02)
+                    </span>
+                    <h1 class="h4 mb-0">
+                        {% if form.instance.pk %}Edit Household Unit{% else %}Register Household Unit{% endif %}
+                    </h1>
+                </div>
+                <span class="role-tag role-tag-{{ user.role }}">
+                    {{ user.get_role_display }}
+                </span>
+            </div>
+
+            <div class="sk-card-body">
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-portal alert-portal-danger mb-3" role="alert">
+                        {% for error in form.non_field_errors %}
+                            <div><i class="bi bi-exclamation-octagon-fill me-1"></i>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="{{ form.block_number.id_for_label }}" class="form-label">
+                                Block Number <span class="text-danger">*</span>
+                            </label>
+                            {{ form.block_number }}
+                            <div class="form-text text-muted small">Positive integer (&gt; 0) per BR-06.</div>
+                            {% if form.block_number.errors %}
+                                <div class="invalid-feedback d-block text-danger small mt-1">
+                                    {% for error in form.block_number.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="{{ form.lot_number.id_for_label }}" class="form-label">
+                                Lot Number <span class="text-danger">*</span>
+                            </label>
+                            {{ form.lot_number }}
+                            <div class="form-text text-muted small">Positive integer (&gt; 0) per BR-06.</div>
+                            {% if form.lot_number.errors %}
+                                <div class="invalid-feedback d-block text-danger small mt-1">
+                                    {% for error in form.lot_number.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.street_name.id_for_label }}" class="form-label">
+                            Street Name <span class="text-danger">*</span>
+                        </label>
+                        {{ form.street_name }}
+                        <div class="form-text text-muted small">
+                            Enter the official subdivision street or avenue name (e.g., Narra Street, Molave Avenue).
+                        </div>
+                        {% if form.street_name.errors %}
+                            <div class="invalid-feedback d-block text-danger small mt-1">
+                                {% for error in form.street_name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="pt-3 border-top d-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-sekyu-emerald">
+                            <i class="bi bi-check2 me-1"></i>{% if form.instance.pk %}Update Household Unit{% else %}Register Household Unit{% endif %}
+                        </button>
+                        <a href="{% url 'household_list' %}" class="btn btn-outline-sekyu">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

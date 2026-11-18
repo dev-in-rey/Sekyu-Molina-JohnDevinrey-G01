@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — HOA Household Directory{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-11">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to HOA Administration Console
+            </a>
+        </div>
+
+        <div class="sk-banner-admin mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.08em; color: #fca5a5;">
+                        <i class="bi bi-houses-fill me-1"></i>HOA Subdivision Property Directory
+                    </span>
+                    <h1 class="h3 text-white mb-1">Registered Subdivision Households</h1>
+                    <p class="sk-text-on-dark-muted small mb-0">
+                        Audit block and lot registrations and manage HOA property standing (BR-04, BR-13).
+                    </p>
+                </div>
+                <span class="role-tag role-tag-ADMIN">HOA Administrator</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-sm-4">
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-navy">
+                        <i class="bi bi-houses"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Total Units</span>
+                        <div class="h4 mb-0 tabular-nums">{{ total_households }}</div>
+                        <span class="text-muted small">Registered properties</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-emerald">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Good Standing</span>
+                        <div class="h4 mb-0 text-success tabular-nums">{{ good_standing_count }}</div>
+                        <span class="text-muted small">Cleared for pass generation</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-amber">
+                        <i class="bi bi-exclamation-diamond"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Delinquent / Inactive</span>
+                        <div class="h4 mb-0 sk-text-amber tabular-nums">{{ delinquent_count }}D &middot; {{ inactive_count }}I</div>
+                        <span class="text-muted small">Pass generation restricted</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sk-card">
+            <div class="sk-card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h5 mb-0">Subdivision Block &amp; Lot Registry</h2>
+                    <span class="text-muted small">Update HOA property standing to control visitor pass eligibility (BR-13)</span>
+                </div>
+                <span class="badge bg-dark tabular-nums">{{ total_households }} Total</span>
+            </div>
+
+            <div class="sk-card-body p-0">
+                {% if households %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 sk-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Property Unit</th>
+                                    <th>Homeowner</th>
+                                    <th>Account Approval</th>
+                                    <th>HOA Standing</th>
+                                    <th class="pe-4 text-end">Update HOA Standing</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for unit in households %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-semibold">{{ unit.unit_label }}</div>
+                                            <div class="text-muted small font-mono-code">Unit #{{ unit.id }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">{{ unit.user.get_full_name|default:unit.user.username }}</div>
+                                            <div class="text-muted small font-mono-code">@{{ unit.user.username }} &middot; {{ unit.user.email }}</div>
+                                        </td>
+                                        <td>
+                                            {% if unit.user.is_approved %}
+                                                <span class="status-badge-approved">
+                                                    <i class="bi bi-check-circle-fill"></i>Approved
+                                                </span>
+                                            {% else %}
+                                                <span class="status-badge-pending">
+                                                    <i class="bi bi-hourglass-split"></i>Pending
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if unit.hoa_status == "GOOD_STANDING" %}
+                                                <span class="status-badge-approved">Good Standing</span>
+                                            {% elif unit.hoa_status == "DELINQUENT" %}
+                                                <span class="status-badge-pending">Delinquent</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <form method="post" action="{% url 'manage_household_status' unit.pk %}" class="d-inline-flex align-items-center gap-1">
+                                                {% csrf_token %}
+                                                <select name="hoa_status" class="form-select form-select-sm" style="width: auto;">
+                                                    {% for status_val, status_label in hoa_status_choices %}
+                                                        <option value="{{ status_val }}" {% if unit.hoa_status == status_val %}selected{% endif %}>
+                                                            {{ status_label }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" class="btn btn-outline-sekyu btn-sm">
+                                                    Update
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-houses fs-2 d-block mb-2"></i>
+                        <div class="fw-semibold">No household units registered yet</div>
+                        <div class="small">Residents who register their block, lot, and street will appear here.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
