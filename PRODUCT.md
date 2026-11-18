@@ -22,8 +22,8 @@ Unlike generic campus or corporate portals, Sekyu is designed specifically aroun
 
 ## Operating Context
 
-- **Current Active Scope (Accounts & Role Dashboards):** Full-stack Django web portal with PostgreSQL (`sekyu_db`), username or email authentication, resident self-registration (`is_approved=False` until HOA review), role-isolated dashboards (`/dashboard/resident/`, `/dashboard/guard/`, `/dashboard/admin/`), and self-service profile/photo management (`/accounts/profile/`).
-- **Planned SDD Modules (Future Phases):** Household block/lot registration, resident vehicle registry, cryptographic QR + 4-digit PIN visitor passes, gatehouse scanner/manual walk-in fallback, gate access logs, HOA announcements, and automated 24-hour visitor PII redaction.
+- **Current Active Scope (PD1 Accounts & Dashboards + PD2 Households, Visitor Passes & Gate Logs):** Full-stack Django web portal with PostgreSQL (`sekyu_db`), username or email authentication, resident self-registration (`is_approved=False` until HOA review), role-isolated dashboards (`/dashboard/resident/`, `/dashboard/guard/`, `/dashboard/admin/`), self-service profile/photo management (`/accounts/profile/`), subdivision household block/lot registration (`/households/`), 4-digit PIN digital visitor pass generation (`/passes/`), guardhouse 4-digit PIN validation kiosk (`/passes/validate/`), and immutable gate access entry/exit logging (`/passes/logs/`).
+- **Planned SDD Modules (Future Phases):** Resident vehicle registry, optical camera QR scanning, manual walk-in visitor fallback form, offline SQLite guard tablet sync cache, HOA community announcements, and automated 24-hour visitor PII redaction.
 - **Deployment Context:** Single-subdivision or gated residential community per deployment instance (`Asia/Manila` timezone).
 
 ## Capabilities and Constraints
