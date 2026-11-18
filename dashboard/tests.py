@@ -5,8 +5,13 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from datetime import timedelta
+from django.utils import timezone
+
 from accounts.models import CustomUser
 from dashboard.apps import DashboardConfig
+from households.models import Household
+from passes.models import VisitorPass
 
 
 def _make_avatar(name="guard_avatar.png"):
@@ -95,11 +100,26 @@ class DashboardTests(TestCase):
         self.assertEqual(self.client.get(reverse("guard_dashboard")).status_code, 403)
         self.assertEqual(self.client.get(reverse("admin_dashboard")).status_code, 403)
 
-        # Resident (approved, with photo)
+        # Resident (approved, with photo, household, and pass)
+        hh = Household.objects.create(
+            user=self.resident_approved,
+            block_number=2,
+            lot_number=5,
+            street_name="Narra Street",
+        )
+        now = timezone.now()
+        VisitorPass.objects.create(
+            household=hh,
+            visitor_name="Courier Express",
+            valid_from=now - timedelta(minutes=10),
+            valid_until=now + timedelta(hours=2),
+        )
         self.client.force_login(self.resident_approved)
         res_ok_dash = self.client.get(reverse("resident_dashboard"))
         self.assertEqual(res_ok_dash.status_code, 200)
         self.assertContains(res_ok_dash, "Verified Homeowner Standing")
+        self.assertContains(res_ok_dash, "Narra Street")
+        self.assertContains(res_ok_dash, "Courier Express")
 
         # Guard
         self.client.force_login(self.guard)

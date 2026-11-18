@@ -5,6 +5,8 @@ plugins =
 source =
     accounts
     dashboard
+    households
+    passes
     sekyu
     templates
 omit =
