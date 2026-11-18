@@ -12,7 +12,25 @@
 
 It is powered by **Django Templates + Bootstrap 5 (via CDN)** on the frontend and **PostgreSQL** on the backend.
 
-### Implemented Account Features
+### Implemented Core Features (Project Development 2 — Vertical Slice)
+1. **Household Profile Registration & HOA Standing (`households` app — `/households/`)**
+   - **Resident CRUD (`/households/`, `/households/create/`, `/households/<pk>/edit/`, `/households/<pk>/delete/`):** Logged-in residents register and manage their subdivision property units (`block_number`, `lot_number`, `street_name`) linked via `ForeignKey` (`PROTECT`) to `CustomUser` (BR-05).
+   - **Database & Business Rule Constraints:** Enforces positive integer block and lot numbers (`block_number > 0 AND lot_number > 0`, BR-06), unique `(block_number, lot_number, street_name)` across the subdivision (BR-04), and prevents deletion if visitor passes or gate logs reference the unit (`ProtectedError`).
+   - **HOA Standing Management (`/households/manage/`, `/households/<pk>/status/`):** HOA Administrators view all subdivision households and update `hoa_status` (`GOOD_STANDING`, `DELINQUENT`, `INACTIVE`) to control visitor pass eligibility (BR-13).
+   - **Ownership & Role Isolation:** Residents can only view, edit, or delete their own households (HTTP 403 Forbidden otherwise).
+2. **Digital Visitor Pass Generation & 4-Digit PIN Guardhouse Validation (`passes` app — `/passes/`)**
+   - **Resident Pass CRUD (`/passes/`, `/passes/create/`, `/passes/<pk>/`, `/passes/<pk>/edit/`, `/passes/<pk>/revoke/`, `/passes/<pk>/delete/`):**
+     - Verified residents with a household in `GOOD_STANDING` (BR-13) generate time-bound digital visitor passes (`GUEST`, `DELIVERY`, `SERVICE`, `CONTRACTOR`) with an automatically generated 4-digit security PIN (`access_pin`, BR-10) and unique cryptographic token (`qr_token`, BR-11).
+     - Enforces `valid_until > valid_from` (BR-09) and valid lifecycle statuses (`PENDING`, `ACTIVE`, `USED`, `EXPIRED`, `REVOKED`, BR-12).
+     - Residents can view the high-contrast 4-Digit PIN credential card, edit active/pending passes, revoke passes, or delete unused passes (passes referenced by a `GateAccessLog` are protected against deletion per BR-19).
+   - **Guardhouse 4-Digit PIN Validation Kiosk (`/passes/validate/`):**
+     - On-duty Security Guards validate incoming visitors by entering the 4-digit PIN via the on-screen keypad or keyboard.
+     - Automatically marks passes past `valid_until` as `EXPIRED` (BR-14), transitions single-entry passes to `USED` upon granted clearance (BR-15), and records an immutable `GateAccessLog` (`GRANTED` or `DENIED`, BR-17) linked to the processing guard (`guard_user`, BR-16), `VisitorPass` (BR-19), and destination `Household`.
+   - **Gate Access Logs & Exit Tracking (`/passes/logs/`, `/passes/logs/<pk>/exit/`):**
+     - Security Guards and HOA Administrators inspect and filter gate entry/exit transactions (`GRANTED`, `DENIED`, `MANUAL_OVERRIDE`).
+     - Guards record visitor departure timestamps (`exit_timestamp >= entry_timestamp`, BR-18).
+
+### Implemented Standard Account Features (Project Development 1)
 1. **Account Registration (`/accounts/signup/`)**
    - Homeowners/residents can register with `username`, `email`, `first_name`, `last_name`, `phone_number`, and confirmed passwords.
    - Validates required fields, email format, unique username and email (BR-01), and matching passwords.
