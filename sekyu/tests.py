@@ -116,6 +116,16 @@ class ProjectConfigurationAndStructureTests(TestCase):
             "dashboard/resident_dashboard.html",
             "dashboard/guard_dashboard.html",
             "dashboard/admin_dashboard.html",
+            "households/household_list.html",
+            "households/household_form.html",
+            "households/household_confirm_delete.html",
+            "households/admin_household_list.html",
+            "passes/pass_list.html",
+            "passes/pass_form.html",
+            "passes/pass_detail.html",
+            "passes/pass_confirm_delete.html",
+            "passes/guard_validate.html",
+            "passes/gate_logs.html",
         ]
         for rel_path in template_files:
             text = (base_dir / "templates" / rel_path).read_text(encoding="utf-8")
