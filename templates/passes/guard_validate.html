@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — Guardhouse 4-Digit PIN Validation Kiosk{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+            <a href="{% url 'guard_dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to Guardhouse Kiosk
+            </a>
+            <a href="{% url 'gate_log_list' %}" class="btn btn-outline-sekyu btn-sm">
+                <i class="bi bi-journal-check me-1"></i>View Gate Access Logs
+            </a>
+        </div>
+
+        <div class="sk-banner-guard mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.08em; color: #fcd34d;">
+                        <i class="bi bi-shield-lock-fill me-1"></i>Checkpoint Pass Verification Terminal (F-05)
+                    </span>
+                    <h1 class="h3 text-white mb-1">4-Digit Visitor PIN Validation</h1>
+                    <p class="sk-text-on-dark-muted small mb-0">
+                        Enter the visitor's 4-digit security PIN to verify household clearance and record gate entry (BR-10, BR-14, BR-15).
+                    </p>
+                </div>
+                <div class="text-md-end">
+                    <span class="badge bg-warning text-dark fw-bold tabular-nums">{{ active_passes_count }} Active Pass{{ active_passes_count|pluralize:"es" }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if validation_result %}
+            <div class="sk-card-elevated mb-4 border-2 {% if validation_result.outcome == 'GRANTED' %}border-success{% else %}border-danger{% endif %}">
+                <div class="sk-card-body">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                        <div>
+                            {% if validation_result.outcome == "GRANTED" %}
+                                <span class="status-badge-approved mb-2">
+                                    <i class="bi bi-check-circle-fill"></i>GATE CLEARANCE GRANTED
+                                </span>
+                                <h2 class="h4 text-success mb-1">{{ validation_result.visitor_pass.visitor_name }}</h2>
+                                <div class="fw-semibold text-dark">
+                                    Destination: {{ validation_result.visitor_pass.household.unit_label }}
+                                    ({{ validation_result.visitor_pass.household.user.get_full_name|default:validation_result.visitor_pass.household.user.username }})
+                                </div>
+                                <div class="small text-muted mt-1">{{ validation_result.reason }}</div>
+                            {% else %}
+                                <span class="badge bg-danger mb-2">
+                                    <i class="bi bi-x-octagon-fill me-1"></i>GATE CLEARANCE DENIED
+                                </span>
+                                <h2 class="h4 text-danger mb-1">
+                                    {% if validation_result.visitor_pass %}
+                                        {{ validation_result.visitor_pass.visitor_name }} (PIN {{ validation_result.pin }})
+                                    {% else %}
+                                        Unrecognized PIN: {{ validation_result.pin }}
+                                    {% endif %}
+                                </h2>
+                                <div class="small text-dark fw-semibold">{{ validation_result.reason }}</div>
+                            {% endif %}
+                        </div>
+                        {% if validation_result.log %}
+                            <div class="text-md-end small font-mono-code text-muted">
+                                <div>Audit Log #{{ validation_result.log.id }}</div>
+                                <div>{{ validation_result.log.entry_timestamp|date:"M d, Y g:i:s A" }}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- 4-Digit PIN Keypad & Input Form -->
+            <div class="col-lg-5">
+                <div class="sk-card-elevated h-100">
+                    <div class="sk-card-header">
+                        <h2 class="h5 mb-0"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Enter 4-Digit PIN</h2>
+                        <span class="text-muted small">Verify guest pass in under 15 seconds</span>
+                    </div>
+
+                    <div class="sk-card-body">
+                        <form method="post" novalidate id="guardPinForm">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="{{ form.access_pin.id_for_label }}" class="form-label">
+                                    {{ form.access_pin.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.access_pin }}
+                                {% if form.access_pin.errors %}
+                                    <div class="invalid-feedback d-block text-danger small mt-1">
+                                        {% for error in form.access_pin.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- On-Screen Guard Kiosk Numeric Keypad -->
+                            <div class="row g-2 mb-3" aria-label="Numeric PIN Keypad">
+                                {% for digit in "123456789" %}
+                                    <div class="col-4">
+                                        <button type="button" class="btn btn-outline-sekyu w-100 py-2 fw-bold font-mono-code sk-pin-key" data-digit="{{ digit }}">
+                                            {{ digit }}
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-outline-secondary w-100 py-2 small fw-semibold" id="pinClearBtn">
+                                        Clear
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-outline-sekyu w-100 py-2 fw-bold font-mono-code sk-pin-key" data-digit="0">
+                                        0
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-outline-secondary w-100 py-2 small fw-semibold" id="pinBackBtn">
+                                        <i class="bi bi-backspace"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.remarks.id_for_label }}" class="form-label">
+                                    {{ form.remarks.label }}
+                                </label>
+                                {{ form.remarks }}
+                                {% if form.remarks.errors %}
+                                    <div class="invalid-feedback d-block text-danger small mt-1">
+                                        {% for error in form.remarks.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <button type="submit" class="btn btn-sekyu-emerald w-100 py-2">
+                                <i class="bi bi-shield-check me-1"></i>Validate PIN &amp; Log Entry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Gate Access Logs -->
+            <div class="col-lg-7">
+                <div class="sk-card h-100">
+                    <div class="sk-card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="h5 mb-0">Recent Checkpoint Clearances</h2>
+                            <span class="text-muted small">Latest gatehouse verification events (F-07)</span>
+                        </div>
+                        <a href="{% url 'gate_log_list' %}" class="btn btn-outline-sekyu btn-sm">Full Log &rarr;</a>
+                    </div>
+
+                    <div class="sk-card-body p-0">
+                        {% if recent_logs %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 sk-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-4">Visitor &amp; Unit</th>
+                                            <th>Verdict</th>
+                                            <th>Entry / Exit</th>
+                                            <th class="pe-4 text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in recent_logs %}
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <div class="fw-semibold">{{ log.visitor_name }}</div>
+                                                    <div class="text-muted small">{{ log.household.unit_label }}</div>
+                                                </td>
+                                                <td>
+                                                    {% if log.verification_status == "GRANTED" %}
+                                                        <span class="status-badge-approved">Granted</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Denied</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="small tabular-nums">
+                                                    <div>In: {{ log.entry_timestamp|date:"M d, g:i A" }}</div>
+                                                    {% if log.exit_timestamp %}
+                                                        <div class="text-muted">Out: {{ log.exit_timestamp|date:"M d, g:i A" }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="pe-4 text-end">
+                                                    {% if log.verification_status == "GRANTED" and not log.exit_timestamp %}
+                                                        <form method="post" action="{% url 'record_gate_exit' log.pk %}" class="d-inline">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-outline-sekyu btn-sm">
+                                                                Log Exit
+                                                            </button>
+                                                        </form>
+                                                    {% else %}
+                                                        <span class="text-muted small">—</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="p-5 text-center text-muted small">
+                                No gate access transactions recorded yet during this shift.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var pinInput = document.getElementById("{{ form.access_pin.id_for_label }}");
+    if (!pinInput) return;
+
+    document.querySelectorAll(".sk-pin-key").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            if (pinInput.value.length < 4) {
+                pinInput.value += btn.getAttribute("data-digit");
+                pinInput.focus();
+            }
+        });
+    });
+
+    var clearBtn = document.getElementById("pinClearBtn");
+    if (clearBtn) {
+        clearBtn.addEventListener("click", function () {
+            pinInput.value = "";
+            pinInput.focus();
+        });
+    }
+
+    var backBtn = document.getElementById("pinBackBtn");
+    if (backBtn) {
+        backBtn.addEventListener("click", function () {
+            pinInput.value = pinInput.value.slice(0, -1);
+            pinInput.focus();
+        });
+    }
+})();
+</script>
+{% endblock %}
