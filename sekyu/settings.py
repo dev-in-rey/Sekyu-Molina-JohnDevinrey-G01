@@ -45,7 +45,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "dashboard",
+    "households",
 ]
+
+if (BASE_DIR / "passes" / "apps.py").exists():  # pragma: no branch
+    INSTALLED_APPS.append("passes")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
