@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — My Household Units{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+            <a href="{% url 'resident_dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to Resident Dashboard
+            </a>
+            <a href="{% url 'household_create' %}" class="btn btn-sekyu-emerald btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>Register Household Unit
+            </a>
+        </div>
+
+        <div class="sk-banner-resident mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.08em; color: #a7f3d0;">
+                        <i class="bi bi-houses-fill me-1"></i>Subdivision Property Registry (F-02)
+                    </span>
+                    <h1 class="h3 text-white mb-1">My Registered Household Units</h1>
+                    <p class="sk-text-on-dark-muted small mb-0">
+                        Manage your subdivision block, lot, and street designations for HOA verification and visitor pass issuance.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if user.is_approved %}
+                        <span class="status-badge-approved">
+                            <i class="bi bi-patch-check-fill"></i>Account Approved
+                        </span>
+                    {% else %}
+                        <span class="status-badge-pending">
+                            <i class="bi bi-hourglass-split"></i>Pending HOA Approval
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="sk-card">
+            <div class="sk-card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h5 mb-0">Household Units Linked to Your Account</h2>
+                    <span class="text-muted small">Each property is uniquely identified by Block, Lot, and Street Name (BR-04)</span>
+                </div>
+                <span class="badge bg-dark tabular-nums">{{ households|length }} Unit{{ households|length|pluralize }}</span>
+            </div>
+
+            <div class="sk-card-body p-0">
+                {% if households %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 sk-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Subdivision Unit</th>
+                                    <th>Block &amp; Lot</th>
+                                    <th>Street Name</th>
+                                    <th>HOA Standing</th>
+                                    <th>Pass Eligibility (BR-13)</th>
+                                    <th class="pe-4 text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for unit in households %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-semibold">{{ unit.unit_label }}</div>
+                                            <div class="text-muted small font-mono-code">Unit #{{ unit.id }} &middot; Registered {{ unit.created_at|date:"M d, Y" }}</div>
+                                        </td>
+                                        <td class="tabular-nums">
+                                            <span class="badge bg-light text-dark border">Blk {{ unit.block_number }}</span>
+                                            <span class="badge bg-light text-dark border">Lot {{ unit.lot_number }}</span>
+                                        </td>
+                                        <td>{{ unit.street_name }}</td>
+                                        <td>
+                                            {% if unit.hoa_status == "GOOD_STANDING" %}
+                                                <span class="status-badge-approved">
+                                                    <i class="bi bi-check-circle-fill"></i>Good Standing
+                                                </span>
+                                            {% elif unit.hoa_status == "DELINQUENT" %}
+                                                <span class="status-badge-pending">
+                                                    <i class="bi bi-exclamation-triangle-fill"></i>Delinquent
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if unit.is_verified_for_passes %}
+                                                <span class="small text-success fw-semibold">
+                                                    <i class="bi bi-shield-check me-1"></i>Cleared for Visitor Passes
+                                                </span>
+                                            {% else %}
+                                                <span class="small sk-text-amber fw-semibold">
+                                                    <i class="bi bi-shield-exclamation me-1"></i>Requires HOA Clearance
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <div class="d-inline-flex gap-1">
+                                                <a href="{% url 'household_edit' unit.pk %}" class="btn btn-outline-sekyu btn-sm">
+                                                    <i class="bi bi-pencil-square me-1"></i>Edit
+                                                </a>
+                                                <a href="{% url 'household_delete' unit.pk %}" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash me-1"></i>Delete
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-house-add fs-2 d-block mb-2"></i>
+                        <div class="fw-semibold text-dark mb-1">No household units registered yet</div>
+                        <p class="small mb-3">
+                            Register your subdivision Block, Lot, and Street address to link your residence and issue digital visitor passes.
+                        </p>
+                        <a href="{% url 'household_create' %}" class="btn btn-sekyu-emerald btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>Register Your First Household Unit
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="sk-card-footer text-muted small d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-lock-fill text-success me-1"></i>You can only view and modify household records registered under your account.</span>
+                <span class="font-mono-code">Owner: @{{ user.username }}</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
