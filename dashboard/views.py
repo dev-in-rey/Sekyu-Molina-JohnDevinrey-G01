@@ -3,10 +3,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
 from django.views.generic import RedirectView, TemplateView
 
 from accounts.models import CustomUser
+from households.models import Household
+from passes.models import GateAccessLog, VisitorPass
 
 
 class RoleRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -53,6 +56,19 @@ class ResidentDashboardView(RoleRequiredMixin, TemplateView):
         context["guard_count"] = CustomUser.objects.filter(
             role=CustomUser.Role.GUARD, is_active=True
         ).count()
+        my_households = Household.objects.filter(user=self.request.user)
+        context["my_households"] = my_households
+        context["my_household_count"] = my_households.count()
+        my_passes = VisitorPass.objects.select_related("household").filter(
+            household__user=self.request.user
+        )
+        now = timezone.now()
+        for pass_obj in my_passes:
+            pass_obj.refresh_expiration(now=now)
+        context["recent_passes"] = my_passes.order_by("-created_at")[:5]
+        context["active_pass_count"] = my_passes.filter(
+            status__in=[VisitorPass.Status.ACTIVE, VisitorPass.Status.PENDING]
+        ).count()
         return context
 
 
@@ -72,6 +88,13 @@ class GuardDashboardView(RoleRequiredMixin, TemplateView):
             role=CustomUser.Role.RESIDENT,
             is_approved=False,
         ).count()
+        context["active_passes_count"] = VisitorPass.objects.filter(
+            status__in=[VisitorPass.Status.ACTIVE, VisitorPass.Status.PENDING],
+            valid_until__gt=timezone.now(),
+        ).count()
+        context["recent_gate_logs"] = GateAccessLog.objects.select_related(
+            "household", "visitor_pass", "guard_user"
+        ).order_by("-entry_timestamp")[:5]
         return context
 
 
@@ -94,6 +117,11 @@ class AdminDashboardView(RoleRequiredMixin, TemplateView):
         context["guard_count"] = users_qs.filter(role=CustomUser.Role.GUARD).count()
         context["admin_count"] = users_qs.filter(role=CustomUser.Role.ADMIN).count()
         context["role_choices"] = CustomUser.Role.choices
+        context["household_count"] = Household.objects.count()
+        context["gate_log_count"] = GateAccessLog.objects.count()
+        context["recent_gate_logs"] = GateAccessLog.objects.select_related(
+            "household", "visitor_pass", "guard_user"
+        ).order_by("-entry_timestamp")[:5]
         return context
 
 

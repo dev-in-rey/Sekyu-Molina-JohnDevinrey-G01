@@ -49,16 +49,46 @@
                                         <i class="bi bi-house-door-fill me-1"></i>Resident Home
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sk-nav-link {% if 'household' in current_url %}active{% endif %}" href="{% url 'household_list' %}">
+                                        <i class="bi bi-houses me-1"></i>My Households
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sk-nav-link {% if 'pass_' in current_url %}active{% endif %}" href="{% url 'pass_list' %}">
+                                        <i class="bi bi-key-fill me-1"></i>Visitor Passes
+                                    </a>
+                                </li>
                             {% elif user.role == "GUARD" %}
                                 <li class="nav-item">
                                     <a class="nav-link sk-nav-link {% if current_url == 'guard_dashboard' %}active-guard{% endif %}" href="{% url 'guard_dashboard' %}">
                                         <i class="bi bi-shield-check me-1"></i>Guard Kiosk
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sk-nav-link {% if current_url == 'guard_pass_validate' %}active-guard{% endif %}" href="{% url 'guard_pass_validate' %}">
+                                        <i class="bi bi-grid-3x3-gap-fill me-1"></i>Validate PIN
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sk-nav-link {% if current_url == 'gate_log_list' %}active-guard{% endif %}" href="{% url 'gate_log_list' %}">
+                                        <i class="bi bi-journal-check me-1"></i>Gate Logs
+                                    </a>
+                                </li>
                             {% elif user.role == "ADMIN" %}
                                 <li class="nav-item">
                                     <a class="nav-link sk-nav-link {% if current_url == 'admin_dashboard' or current_url == 'admin_panel' %}active-admin{% endif %}" href="{% url 'admin_dashboard' %}">
                                         <i class="bi bi-sliders me-1"></i>HOA Console
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sk-nav-link {% if current_url == 'admin_household_list' %}active-admin{% endif %}" href="{% url 'admin_household_list' %}">
+                                        <i class="bi bi-houses me-1"></i>Households
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sk-nav-link {% if current_url == 'gate_log_list' %}active-admin{% endif %}" href="{% url 'gate_log_list' %}">
+                                        <i class="bi bi-journal-text me-1"></i>Gate Logs
                                     </a>
                                 </li>
                             {% endif %}
