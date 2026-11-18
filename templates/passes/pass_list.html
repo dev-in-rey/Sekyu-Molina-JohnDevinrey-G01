@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — My Visitor Passes{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+            <a href="{% url 'resident_dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to Resident Dashboard
+            </a>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'household_list' %}" class="btn btn-outline-sekyu btn-sm">
+                    <i class="bi bi-houses me-1"></i>My Households ({{ user_households_count }})
+                </a>
+                <a href="{% url 'pass_create' %}" class="btn btn-sekyu-emerald btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Generate Visitor Pass
+                </a>
+            </div>
+        </div>
+
+        <div class="sk-banner-resident mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.08em; color: #a7f3d0;">
+                        <i class="bi bi-key-fill me-1"></i>Digital Gate Pass Engine (F-04)
+                    </span>
+                    <h1 class="h3 text-white mb-1">Household Visitor Passes</h1>
+                    <p class="sk-text-on-dark-muted small mb-0">
+                        Issue time-bound 4-digit security PIN passes for guests, couriers, and service contractors.
+                    </p>
+                </div>
+                <div>
+                    {% if can_generate_pass %}
+                        <span class="status-badge-approved">
+                            <i class="bi bi-shield-check"></i>Cleared to Issue Passes
+                        </span>
+                    {% else %}
+                        <span class="status-badge-pending">
+                            <i class="bi bi-exclamation-triangle-fill"></i>Household / HOA Verification Required (BR-13)
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if not can_generate_pass %}
+            <div class="alert alert-warning alert-portal alert-portal-warning mb-4" role="alert">
+                <div class="d-flex align-items-start gap-3">
+                    <i class="bi bi-shield-exclamation fs-5 mt-1"></i>
+                    <div>
+                        <div class="fw-bold">Pass Generation Requirement (BR-13)</div>
+                        <div class="small">
+                            To generate a visitor pass, your resident account must be approved by an HOA Administrator and you must have at least one registered household unit in <strong>Good Standing</strong>.
+                            Manage your units in <a href="{% url 'household_list' %}" class="fw-semibold text-dark text-decoration-underline">My Households</a>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="sk-card">
+            <div class="sk-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h2 class="h5 mb-0">Issued Visitor Passes</h2>
+                    <span class="text-muted small">Share the 4-digit PIN with your guest for guardhouse verification</span>
+                </div>
+
+                <div class="d-flex flex-wrap gap-1">
+                    <a href="{% url 'pass_list' %}" class="btn {% if selected_status == 'ALL' or not selected_status %}btn-sekyu{% else %}btn-outline-sekyu{% endif %} btn-sm">
+                        All
+                    </a>
+                    {% for code, label in status_choices %}
+                        <a href="{% url 'pass_list' %}?status={{ code }}" class="btn {% if selected_status == code %}btn-sekyu{% else %}btn-outline-sekyu{% endif %} btn-sm">
+                            {{ label }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="sk-card-body p-0">
+                {% if passes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 sk-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Visitor</th>
+                                    <th>4-Digit PIN</th>
+                                    <th>Household Unit</th>
+                                    <th>Validity Window</th>
+                                    <th>Status</th>
+                                    <th class="pe-4 text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vpass in passes %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-semibold">{{ vpass.visitor_name }}</div>
+                                            <div class="text-muted small">
+                                                <span class="badge bg-light text-dark border me-1">{{ vpass.get_visitor_type_display }}</span>
+                                                {% if vpass.is_multi_entry %}
+                                                    <span class="text-muted">Multi-entry</span>
+                                                {% else %}
+                                                    <span class="text-muted">Single-entry</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-dark font-mono-code fs-6 px-2 py-1">{{ vpass.access_pin }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ vpass.household.unit_label }}</div>
+                                        </td>
+                                        <td class="small tabular-nums">
+                                            <div>From: {{ vpass.valid_from|date:"M d, Y g:i A" }}</div>
+                                            <div class="text-muted">Until: {{ vpass.valid_until|date:"M d, Y g:i A" }}</div>
+                                        </td>
+                                        <td>
+                                            {% if vpass.status == "ACTIVE" %}
+                                                <span class="status-badge-approved">
+                                                    <i class="bi bi-check-circle-fill"></i>Active
+                                                </span>
+                                            {% elif vpass.status == "PENDING" %}
+                                                <span class="status-badge-pending">
+                                                    <i class="bi bi-clock"></i>Pending
+                                                </span>
+                                            {% elif vpass.status == "USED" %}
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Used</span>
+                                            {% elif vpass.status == "EXPIRED" %}
+                                                <span class="badge bg-secondary">Expired</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Revoked</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <div class="d-inline-flex gap-1">
+                                                <a href="{% url 'pass_detail' vpass.pk %}" class="btn btn-outline-sekyu btn-sm">
+                                                    <i class="bi bi-eye me-1"></i>View PIN
+                                                </a>
+                                                {% if vpass.status == "ACTIVE" or vpass.status == "PENDING" %}
+                                                    <a href="{% url 'pass_edit' vpass.pk %}" class="btn btn-outline-sekyu btn-sm">
+                                                        Edit
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{% url 'pass_delete' vpass.pk %}" class="btn btn-outline-danger btn-sm">
+                                                    Delete
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-ticket-perforated fs-2 d-block mb-2"></i>
+                        <div class="fw-semibold text-dark mb-1">No visitor passes found</div>
+                        <p class="small mb-3">
+                            Generate a time-bound digital pass with a 4-digit security PIN for your expected visitors or deliveries.
+                        </p>
+                        <a href="{% url 'pass_create' %}" class="btn btn-sekyu-emerald btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>Generate Visitor Pass
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="sk-card-footer text-muted small d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-shield-lock me-1"></i>RA 10173 Compliance: Visitor passes are visible only to your household and on-duty gate verification.</span>
+                <span class="font-mono-code">{{ passes|length }} Pass{{ passes|length|pluralize:"es" }}</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

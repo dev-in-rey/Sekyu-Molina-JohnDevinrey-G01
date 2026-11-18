@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — Gate Access Logs &amp; Security Audit{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-11">
+
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+            <a href="{% url 'dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+            {% if user.role == "GUARD" %}
+                <a href="{% url 'guard_pass_validate' %}" class="btn btn-sekyu-emerald btn-sm">
+                    <i class="bi bi-shield-check me-1"></i>Validate 4-Digit PIN
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="{% if user.role == 'ADMIN' %}sk-banner-admin{% else %}sk-banner-guard{% endif %} mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.7rem; letter-spacing: 0.08em; color: #fcd34d;">
+                        <i class="bi bi-journal-text me-1"></i>Immutable Gatehouse Audit Trail (F-07 / F-09)
+                    </span>
+                    <h1 class="h3 text-white mb-1">Subdivision Gate Access Logs</h1>
+                    <p class="sk-text-on-dark-muted small mb-0">
+                        Timestamped entry and exit clearances linked to destination households and processing officers (BR-16, BR-18, BR-19).
+                    </p>
+                </div>
+                <span class="role-tag role-tag-{{ user.role }}">{{ user.get_role_display }}</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-navy">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Total Events</span>
+                        <div class="h4 mb-0 tabular-nums">{{ total_logs_count }}</div>
+                        <span class="text-muted small">Recorded transactions</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-emerald">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Granted Entries</span>
+                        <div class="h4 mb-0 text-success tabular-nums">{{ granted_count }}</div>
+                        <span class="text-muted small">Authorized clearances</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-crimson">
+                        <i class="bi bi-x-octagon-fill"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Denied Attempts</span>
+                        <div class="h4 mb-0 text-danger tabular-nums">{{ denied_count }}</div>
+                        <span class="text-muted small">Blocked at checkpoint</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="sk-stat-tile d-flex align-items-center gap-3">
+                    <div class="sk-stat-icon sk-stat-icon-amber">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <span class="meta-label d-block">Currently Inside</span>
+                        <div class="h4 mb-0 sk-text-amber tabular-nums">{{ inside_count }}</div>
+                        <span class="text-muted small">Awaiting exit log</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sk-card">
+            <div class="sk-card-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <h2 class="h5 mb-0">Gate Transaction Registry</h2>
+                    <span class="text-muted small">Filter by verification outcome or search visitor, street, PIN, or guard</span>
+                </div>
+
+                <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control form-control-sm" style="width: 210px;" placeholder="Search visitor, street, PIN...">
+                    <select name="status" class="form-select form-select-sm" style="width: auto;">
+                        <option value="">All Verdicts</option>
+                        {% for code, label in verification_choices %}
+                            <option value="{{ code }}" {% if selected_status == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sekyu btn-sm">Filter</button>
+                    {% if search_query or selected_status != "ALL" and selected_status %}
+                        <a href="{% url 'gate_log_list' %}" class="btn btn-outline-sekyu btn-sm">Reset</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <div class="sk-card-body p-0">
+                {% if gate_logs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 sk-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Log ID &amp; Visitor</th>
+                                    <th>Destination Unit</th>
+                                    <th>Pass PIN</th>
+                                    <th>Guard Officer</th>
+                                    <th>Entry &amp; Exit</th>
+                                    <th>Verdict</th>
+                                    <th class="pe-4 text-end">Exit / Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in gate_logs %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-semibold">{{ log.visitor_name }}</div>
+                                            <div class="text-muted small font-mono-code">
+                                                #{{ log.id }} &middot; {{ log.get_visitor_type_display }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-semibold">{{ log.household.unit_label }}</div>
+                                            <div class="text-muted small">@{{ log.household.user.username }}</div>
+                                        </td>
+                                        <td>
+                                            {% if log.visitor_pass %}
+                                                <span class="badge bg-dark font-mono-code">{{ log.visitor_pass.access_pin }}</span>
+                                            {% else %}
+                                                <span class="text-muted small">Walk-in</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="small">
+                                            {{ log.guard_user.get_full_name|default:log.guard_user.username }}
+                                        </td>
+                                        <td class="small tabular-nums">
+                                            <div>In: {{ log.entry_timestamp|date:"M d, Y g:i A" }}</div>
+                                            {% if log.exit_timestamp %}
+                                                <div class="text-muted">Out: {{ log.exit_timestamp|date:"M d, Y g:i A" }}</div>
+                                            {% else %}
+                                                <div class="text-muted fst-italic">No exit recorded</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if log.verification_status == "GRANTED" %}
+                                                <span class="status-badge-approved">Granted</span>
+                                            {% elif log.verification_status == "DENIED" %}
+                                                <span class="badge bg-danger">Denied</span>
+                                            {% else %}
+                                                <span class="status-badge-pending">Override</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            {% if user.role == "GUARD" and log.verification_status == "GRANTED" and not log.exit_timestamp %}
+                                                <form method="post" action="{% url 'record_gate_exit' log.pk %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-sekyu btn-sm">
+                                                        <i class="bi bi-box-arrow-right me-1"></i>Record Exit
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <span class="small text-muted">{{ log.remarks|default:"—" }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
+                        <div class="fw-semibold">No gate access logs match your filter</div>
+                        <div class="small">Validated visitor pass entries and denials will be recorded here automatically.</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="sk-card-footer text-muted small d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-shield-lock me-1"></i>Audit Integrity (BR-19): Gate access logs referencing visitor passes are immutable and cannot be deleted.</span>
+                <span class="font-mono-code">{{ gate_logs|length }} Shown</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

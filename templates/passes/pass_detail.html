@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Sekyu — Visitor Pass #{{ visitor_pass.id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-9 col-xl-8">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <a href="{% url 'pass_list' %}" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Back to My Visitor Passes
+            </a>
+            <div class="d-flex flex-wrap gap-2">
+                {% if visitor_pass.status == "ACTIVE" or visitor_pass.status == "PENDING" %}
+                    <a href="{% url 'pass_edit' visitor_pass.pk %}" class="btn btn-outline-sekyu btn-sm">
+                        <i class="bi bi-pencil-square me-1"></i>Edit Pass
+                    </a>
+                    <form method="post" action="{% url 'pass_revoke' visitor_pass.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-slash-circle me-1"></i>Revoke Pass
+                        </button>
+                    </form>
+                {% endif %}
+                <a href="{% url 'pass_delete' visitor_pass.pk %}" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash me-1"></i>Delete
+                </a>
+            </div>
+        </div>
+
+        <div class="sk-card-elevated mb-4">
+            <div class="sk-id-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <span class="text-uppercase fw-bold d-block mb-1" style="font-size: 0.68rem; letter-spacing: 0.1em; color: #a7f3d0;">
+                            Sekyu &middot; Digital Gate Authorization Credential
+                        </span>
+                        <h1 class="h3 text-white mb-1">{{ visitor_pass.visitor_name }}</h1>
+                        <span class="small sk-text-on-dark-muted">
+                            {{ visitor_pass.get_visitor_type_display }} &middot; Destination: {{ visitor_pass.household.unit_label }}
+                        </span>
+                    </div>
+
+                    <div class="text-md-end">
+                        {% if visitor_pass.status == "ACTIVE" %}
+                            <span class="status-badge-approved">
+                                <i class="bi bi-check-circle-fill"></i>Active Pass
+                            </span>
+                        {% elif visitor_pass.status == "PENDING" %}
+                            <span class="status-badge-pending">
+                                <i class="bi bi-clock"></i>Pending Start Window
+                            </span>
+                        {% elif visitor_pass.status == "USED" %}
+                            <span class="badge bg-info text-dark">Used</span>
+                        {% elif visitor_pass.status == "EXPIRED" %}
+                            <span class="badge bg-secondary">Expired</span>
+                        {% else %}
+                            <span class="badge bg-danger">Revoked</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="sk-card-body">
+                <!-- High-Contrast 4-Digit Security PIN Display -->
+                <div class="p-4 mb-4 rounded-3 border text-center" style="background-color: var(--sk-surface-muted);">
+                    <span class="meta-label d-block mb-1">Guardhouse 4-Digit Security PIN (BR-10)</span>
+                    <div class="display-4 fw-bold font-mono-code tabular-nums mb-2" style="letter-spacing: 0.25em; color: var(--sk-navy);">
+                        {{ visitor_pass.access_pin }}
+                    </div>
+                    <div class="small text-muted">
+                        Present this 4-digit PIN to the Security Guard on duty at the subdivision checkpoint.
+                    </div>
+                    <div class="mt-2 small font-mono-code text-muted">
+                        Token ID: {{ visitor_pass.qr_token }}
+                    </div>
+                </div>
+
+                <dl class="row mb-0">
+                    <div class="col-12 record-row">
+                        <div class="row align-items-center">
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-house-door me-2"></i>Destination Unit</dt>
+                            <dd class="col-sm-8 meta-value mb-0">{{ visitor_pass.household.unit_label }}</dd>
+                        </div>
+                    </div>
+
+                    <div class="col-12 record-row">
+                        <div class="row align-items-center">
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-telephone me-2"></i>Visitor Phone</dt>
+                            <dd class="col-sm-8 meta-value mb-0">{{ visitor_pass.visitor_phone|default:"Not provided" }}</dd>
+                        </div>
+                    </div>
+
+                    <div class="col-12 record-row">
+                        <div class="row align-items-center">
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-calendar-event me-2"></i>Valid From</dt>
+                            <dd class="col-sm-8 meta-value mb-0 tabular-nums">{{ visitor_pass.valid_from|date:"F d, Y · g:i A" }}</dd>
+                        </div>
+                    </div>
+
+                    <div class="col-12 record-row">
+                        <div class="row align-items-center">
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-calendar-x me-2"></i>Valid Until</dt>
+                            <dd class="col-sm-8 meta-value mb-0 tabular-nums">{{ visitor_pass.valid_until|date:"F d, Y · g:i A" }}</dd>
+                        </div>
+                    </div>
+
+                    <div class="col-12 record-row">
+                        <div class="row align-items-center">
+                            <dt class="col-sm-4 meta-label"><i class="bi bi-arrow-repeat me-2"></i>Entry Mode</dt>
+                            <dd class="col-sm-8 meta-value mb-0">
+                                {% if visitor_pass.is_multi_entry %}
+                                    Multi-Entry Pass (valid for multiple clearances before expiration)
+                                {% else %}
+                                    Single-Entry Pass (automatically marked USED upon first clearance per BR-15)
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </div>
+                </dl>
+            </div>
+
+            <div class="sk-card-footer d-flex justify-content-between align-items-center text-muted small">
+                <span><i class="bi bi-person-check me-1"></i>Issued by {{ visitor_pass.household.user.get_full_name|default:visitor_pass.household.user.username }}</span>
+                <span class="font-mono-code">Pass #{{ visitor_pass.id }}</span>
+            </div>
+        </div>
+
+        <!-- Gate Verification Activity for This Pass -->
+        <div class="sk-card">
+            <div class="sk-card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h6 mb-0">Checkpoint Verification History</h2>
+                    <span class="text-muted small">Gatehouse entry and exit logs associated with this pass</span>
+                </div>
+                <span class="badge bg-dark tabular-nums">{{ gate_logs|length }} Event{{ gate_logs|length|pluralize }}</span>
+            </div>
+
+            <div class="sk-card-body p-0">
+                {% if gate_logs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 sk-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Entry Timestamp</th>
+                                    <th>Verdict</th>
+                                    <th>Guard on Duty</th>
+                                    <th>Exit Timestamp</th>
+                                    <th class="pe-4">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in gate_logs %}
+                                    <tr>
+                                        <td class="ps-4 small tabular-nums">{{ log.entry_timestamp|date:"M d, Y g:i A" }}</td>
+                                        <td>
+                                            {% if log.verification_status == "GRANTED" %}
+                                                <span class="status-badge-approved">Granted</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Denied</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="small">{{ log.guard_user.get_full_name|default:log.guard_user.username }}</td>
+                                        <td class="small tabular-nums">
+                                            {% if log.exit_timestamp %}
+                                                {{ log.exit_timestamp|date:"M d, Y g:i A" }}
+                                            {% else %}
+                                                <span class="text-muted fst-italic">Not recorded</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="pe-4 small text-muted">{{ log.remarks|default:"—" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-muted small">
+                        No gatehouse verification attempts have been recorded for this pass yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
